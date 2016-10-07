@@ -22,7 +22,6 @@ class Bidding extends Model
 
     public $fillable = [
         'product_id',
-        'repository_id',
         'bid_price',
         'last_price',
         'is_buy_automatically',

@@ -11,7 +11,9 @@ use App\Http\Controllers\AppBaseController;
 use InfyOm\Generator\Criteria\LimitOffsetCriteria;
 use Prettus\Repository\Criteria\RequestCriteria;
 use Response;
-
+use App\Repositories\ProductRepository;
+use App\Models\Product;
+use App\Http\Criteria\UserIdCriteria;
 /**
  * Class BiddingController
  * @package App\Http\Controllers\API
@@ -21,10 +23,13 @@ class BiddingAPIController extends AppBaseController
 {
     /** @var  BiddingRepository */
     private $biddingRepository;
+    /** @var  ProductRepository */
+    private $productRepository;
 
-    public function __construct(BiddingRepository $biddingRepo)
+    public function __construct(BiddingRepository $biddingRepo, ProductRepository $productRepo)
     {
         $this->biddingRepository = $biddingRepo;
+        $this->productRepository = $productRepo;
     }
 
     /**
@@ -38,9 +43,18 @@ class BiddingAPIController extends AppBaseController
     {
         $this->biddingRepository->pushCriteria(new RequestCriteria($request));
         $this->biddingRepository->pushCriteria(new LimitOffsetCriteria($request));
-        $biddings = $this->biddingRepository->all();
+        $this->biddingRepository->pushCriteria(new UserIdCriteria($request));
+        $biddings = $this->biddingRepository->all()->toArray();
 
-        return $this->sendResponse($biddings->toArray(), 'Biddings retrieved successfully');
+        $products = array();
+        foreach ($biddings as $bidding) {
+            $product = Product::find($bidding['product_id']);
+            if ($product) {
+                $products[] = $product;
+            }
+        }
+
+        return $this->sendResponse($products, 'Biddings retrieved successfully');
     }
 
     /**
@@ -55,7 +69,13 @@ class BiddingAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        $biddings = $this->biddingRepository->create($input);
+        $productInput = $request->only(['item_id', 'name', 'image', 'repository_id', 'currency_unit', 'description']);
+        $productInput['price'] =  $request->input('last_price');
+        $product = $this->productRepository->create($productInput);
+
+        $biddingInput = $request->only(['bid_price', 'last_price', 'image', 'is_buy_automatically', 'user_id']);
+        $biddingInput['product_id'] = $product['id'];
+        $biddings = $this->biddingRepository->create($biddingInput);
 
         return $this->sendResponse($biddings->toArray(), 'Bidding saved successfully');
     }

@@ -11,6 +11,8 @@ use App\Http\Controllers\AppBaseController;
 use InfyOm\Generator\Criteria\LimitOffsetCriteria;
 use Prettus\Repository\Criteria\RequestCriteria;
 use Response;
+use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ProductController
@@ -40,7 +42,43 @@ class ProductAPIController extends AppBaseController
         $this->productRepository->pushCriteria(new LimitOffsetCriteria($request));
         $products = $this->productRepository->all();
 
-        return $this->sendResponse($products->toArray(), 'Products retrieved successfully');
+        $client = new Client([
+            'timeout'  => 10.0,
+        ]);
+
+        $limit = $request->get('limit', 10);
+        $offset = $request->get('offset', 1);
+        $name = $request->get('name', 'harry+potter');
+
+        $response = $client->request('GET', 'http://svcs.ebay.com/services/search/FindingService/v1'
+                                           . '?OPERATION-NAME=findItemsByKeywords'
+                                           . '&SERVICE-VERSION=1.0.0'
+                                           . '&SECURITY-APPNAME=HuyHaQua-BidRemin-PRD-02f4f54aa-9267511c'
+                                           . '&RESPONSE-DATA-FORMAT=JSON'
+                                           . '&GLOBAL-ID=EBAY-US'
+                                           . '&keywords='. $name
+                                           . '&paginationInput.pageNumber=' . $offset
+                                           . '&paginationInput.entriesPerPage=' . $limit);
+
+        $content = $response->getBody()->getContents();
+        
+        $result = json_decode($content, true);
+        $findItemsByKeywordsResponse = $result['findItemsByKeywordsResponse'];
+        $searchResult = $findItemsByKeywordsResponse[0]['searchResult'];
+        $count = $searchResult[0]['@count'];
+        $item = $searchResult[0]['item'];
+
+        $products = array();
+        for ($index = 0; $index < $count; $index++) {
+            $products[$index]['item_id'] = $item[$index]['itemId'][0];
+            $products[$index]['name'] = $item[$index]['title'][0];
+            $products[$index]['image'] = $item[$index]['galleryURL'][0];
+            $products[$index]['price'] = $item[$index]['sellingStatus'][0]['currentPrice'][0]['__value__'];
+            $products[$index]['currency_unit'] = $item[$index]['sellingStatus'][0]['currentPrice'][0]['@currencyId'];
+            $products[$index]['repository_id'] = 1;
+        }
+
+        return $this->sendResponse($products, 'Products retrieved successfully');
     }
 
     /**

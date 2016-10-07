@@ -11,7 +11,9 @@ use App\Http\Controllers\AppBaseController;
 use InfyOm\Generator\Criteria\LimitOffsetCriteria;
 use Prettus\Repository\Criteria\RequestCriteria;
 use Response;
-
+use App\Repositories\ProductRepository;
+use App\Models\Product;
+use App\Http\Criteria\UserIdCriteria;
 /**
  * Class CartController
  * @package App\Http\Controllers\API
@@ -21,10 +23,13 @@ class CartAPIController extends AppBaseController
 {
     /** @var  CartRepository */
     private $cartRepository;
+    /** @var  ProductRepository */
+    private $productRepository;
 
-    public function __construct(CartRepository $cartRepo)
+    public function __construct(CartRepository $cartRepo, ProductRepository $productRepo)
     {
         $this->cartRepository = $cartRepo;
+        $this->productRepository = $productRepo;
     }
 
     /**
@@ -38,9 +43,18 @@ class CartAPIController extends AppBaseController
     {
         $this->cartRepository->pushCriteria(new RequestCriteria($request));
         $this->cartRepository->pushCriteria(new LimitOffsetCriteria($request));
+        $this->cartRepository->pushCriteria(new UserIdCriteria($request));
         $carts = $this->cartRepository->all();
 
-        return $this->sendResponse($carts->toArray(), 'Carts retrieved successfully');
+        $products = array();
+        foreach ($carts as $cart) {
+            $product = Product::find($cart['product_id']);
+            if ($product) {
+                $products[] = $product;
+            }
+        }
+
+        return $this->sendResponse($products, 'Carts retrieved successfully');
     }
 
     /**
@@ -55,7 +69,20 @@ class CartAPIController extends AppBaseController
     {
         $input = $request->all();
 
-        $carts = $this->cartRepository->create($input);
+
+        $productInput = $request->only(['item_id', 'name', 'image', 'repository_id', 'currency_unit', 'description']);
+        $productInput['price'] = $request->input('buy_price');
+        $checkProduct = Product::where([['item_id', '=' ,$productInput['item_id']], ['repository_id', '=', $productInput['repository_id']]])->first();
+        if ($checkProduct) {
+            $product = $checkProduct;
+        } else {
+            $product = $this->productRepository->create($productInput);
+        }
+
+        $cartInput = $request->only(['buy_price', 'user_id']);
+        $cartInput['product_id'] = $product->id;
+
+        $carts = $this->cartRepository->create($cartInput);
 
         return $this->sendResponse($carts->toArray(), 'Cart saved successfully');
     }

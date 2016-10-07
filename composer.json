@@ -17,14 +17,16 @@
         "infyomlabs/laravel-generator": "5.3.x-dev",
         "laravelcollective/html": "dev-master",
         "infyomlabs/adminlte-templates": "5.3.x-dev",
-        "tymon/jwt-auth": "0.5.*"
+        "tymon/jwt-auth": "0.5.*",
+        "guzzlehttp/guzzle": "~6.0"
     },
     "autoload": {
         "classmap": [
             "database"
         ],
         "psr-4": {
-            "App\\": "app/"
+            "App\\": "app/",
+            "App\\Http\\Criteria\\": "app/Http/Criteria" 
         }
     },
     "autoload-dev": {
