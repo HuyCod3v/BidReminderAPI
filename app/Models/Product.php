@@ -26,6 +26,7 @@ class Product extends Model
         'name',
         'price',
         'currency_unit',
+        'image',
         'description'
     ];
 
@@ -39,7 +40,8 @@ class Product extends Model
         'name' => 'string',
         'price' => 'double',
         'currency_unit' => 'string',
-        'description' => 'string'
+        'description' => 'string',
+        'image' => 'string'
     ];
 
     /**

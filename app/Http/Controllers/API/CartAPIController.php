@@ -50,7 +50,11 @@ class CartAPIController extends AppBaseController
         foreach ($carts as $cart) {
             $product = Product::find($cart['product_id']);
             if ($product) {
+                $product['cart_id'] = $cart['id'];
+                $product['buy_price'] = $cart['buy_price'];
+
                 $products[] = $product;
+
             }
         }
 

@@ -16,6 +16,7 @@ class ProductRepository extends BaseRepository
         'name',
         'price',
         'currency_unit',
+        'image',
         'description'
     ];
 

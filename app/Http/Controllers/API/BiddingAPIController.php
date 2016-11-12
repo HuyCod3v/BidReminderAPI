@@ -50,6 +50,9 @@ class BiddingAPIController extends AppBaseController
         foreach ($biddings as $bidding) {
             $product = Product::find($bidding['product_id']);
             if ($product) {
+                $product['bid_price'] = $bidding['bid_price'];
+                $product['bidding_id'] = $bidding['id'];
+                $product['is_buy_automatically'] = $bidding['is_buy_automatically'];           
                 $products[] = $product;
             }
         }
