@@ -26,7 +26,8 @@ class User extends Model
         'email',
         'phone',
         'address',
-        'nation'
+        'nation',
+        'firebase_token'
     ];
 
     /**
@@ -40,7 +41,8 @@ class User extends Model
         'email' => 'string',
         'phone' => 'string',
         'address' => 'string',
-        'nation' => 'string'
+        'nation' => 'string',
+        'firebase_token' => 'string'
     ];
 
     /**

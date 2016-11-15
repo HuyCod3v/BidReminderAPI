@@ -54,7 +54,7 @@ class UserAPIController extends AppBaseController
     public function store(CreateUserAPIRequest $request)
     {
         $input = $request->all();
-
+        
         $users = $this->userRepository->create($input);
 
         return $this->sendResponse($users->toArray(), 'User saved successfully');
@@ -100,6 +100,11 @@ class UserAPIController extends AppBaseController
             return $this->sendError('User not found');
         }
 
+        // Change password
+        if (!empty($input['password']) && !($input['password'] == "")) {
+            $input['password'] = bcrypt($input['password']);
+        }
+   
         $user = $this->userRepository->update($input, $id);
 
         return $this->sendResponse($user->toArray(), 'User updated successfully');

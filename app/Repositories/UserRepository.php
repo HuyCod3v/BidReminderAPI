@@ -16,7 +16,8 @@ class UserRepository extends BaseRepository
         'email',
         'phone',
         'address',
-        'nation'
+        'nation',
+        'firebase_token'
     ];
 
     /**

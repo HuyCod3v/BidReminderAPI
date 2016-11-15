@@ -33,3 +33,4 @@ Route::get('authenticate/sign-in', 'AuthenticateAPIController@getSignIn');
 Route::get('authenticate/sign-up', 'AuthenticateAPIController@getSignUp');
 
 Route::get('authenticate/re-sign-in', 'AuthenticateAPIController@getReSignIn');
+

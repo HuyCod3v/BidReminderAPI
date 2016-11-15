@@ -76,6 +76,7 @@ class AuthenticateAPIController extends AppBaseController
                 'phone' => '',
                 'address' => '',
                 'nation' => '',
+				'firebase_token' => ''
         	]);
 		} catch (Exception $e) {
 
@@ -84,4 +85,5 @@ class AuthenticateAPIController extends AppBaseController
 
 		return $this->sendResponse(true, 'User created successfully');
 	}
+
 }

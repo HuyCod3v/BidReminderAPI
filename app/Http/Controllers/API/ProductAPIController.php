@@ -14,6 +14,7 @@ use Response;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 
+
 /**
  * Class ProductController
  * @package App\Http\Controllers\API
@@ -164,4 +165,6 @@ class ProductAPIController extends AppBaseController
 
         return $this->sendResponse($id, 'Product deleted successfully');
     }
+
+    
 }

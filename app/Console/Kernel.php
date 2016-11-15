@@ -13,7 +13,8 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        'App\Console\Commands\CheckPriceCommand',
+        'App\Console\Commands\CheckBiddingCommand'
     ];
 
     /**
@@ -24,8 +25,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+     //   $schedule->command('command:check-price')->everyMinute();
+        $schedule->command('command:check-bidding')->everyMinute();
     }
 
     /**
@@ -37,4 +38,6 @@ class Kernel extends ConsoleKernel
     {
         require base_path('routes/console.php');
     }
+
+    
 }
