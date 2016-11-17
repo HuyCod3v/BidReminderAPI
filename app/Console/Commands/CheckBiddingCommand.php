@@ -13,6 +13,7 @@ use LaravelFCM\Message\OptionsBuilder;
 use LaravelFCM\Message\PayloadDataBuilder;
 use LaravelFCM\Message\PayloadNotificationBuilder;
 use FCM;
+use Carbon\Carbon;
 
 use Illuminate\Support\Facades\Log;
 
@@ -89,7 +90,11 @@ class CheckBiddingCommand extends Command
 
                         $data['MessageType'] = "ChangePrice";
                         $data['Content'] = "Giá sản phẩm " . $product['name'] . " thay đổi từ " . $lastPrice . " thành " . $product['price'];
+                        $data['ProductID'] = $product['id'];
+                        $changedAt = Carbon::now();
 
+                        $data['ChangedAt'] = $changedAt->toDateString();
+                        $data['Price'] = $product['price'];
                         $this->sendFCMMessage($user['firebase_token'], $data);
                     }
                               

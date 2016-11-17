@@ -49,9 +49,11 @@ class ProductAPIController extends AppBaseController
 
         $limit = $request->get('limit', 10);
         $offset = $request->get('offset', 1);
-        $name = $request->get('name', 'harry+potter');
-
-        $response = $client->request('GET', 'http://svcs.ebay.com/services/search/FindingService/v1'
+        $name = $request->get('name');
+        if (empty($name) || $name == "") {
+            return $this->sendResponse($products, 'Products retrieved successfully');
+        } else {
+            $response = $client->request('GET', 'http://svcs.ebay.com/services/search/FindingService/v1'
                                            . '?OPERATION-NAME=findItemsByKeywords'
                                            . '&SERVICE-VERSION=1.0.0'
                                            . '&SECURITY-APPNAME=HuyHaQua-BidRemin-PRD-02f4f54aa-9267511c'
@@ -61,25 +63,26 @@ class ProductAPIController extends AppBaseController
                                            . '&paginationInput.pageNumber=' . $offset
                                            . '&paginationInput.entriesPerPage=' . $limit);
 
-        $content = $response->getBody()->getContents();
-        
-        $result = json_decode($content, true);
-        $findItemsByKeywordsResponse = $result['findItemsByKeywordsResponse'];
-        $searchResult = $findItemsByKeywordsResponse[0]['searchResult'];
-        $count = $searchResult[0]['@count'];
-        $item = $searchResult[0]['item'];
+            $content = $response->getBody()->getContents();
+            
+            $result = json_decode($content, true);
+            $findItemsByKeywordsResponse = $result['findItemsByKeywordsResponse'];
+            $searchResult = $findItemsByKeywordsResponse[0]['searchResult'];
+            $count = $searchResult[0]['@count'];
+            $item = $searchResult[0]['item'];
 
-        $products = array();
-        for ($index = 0; $index < $count; $index++) {
-            $products[$index]['item_id'] = $item[$index]['itemId'][0];
-            $products[$index]['name'] = $item[$index]['title'][0];
-            $products[$index]['image'] = $item[$index]['galleryURL'][0];
-            $products[$index]['price'] = $item[$index]['sellingStatus'][0]['currentPrice'][0]['__value__'];
-            $products[$index]['currency_unit'] = $item[$index]['sellingStatus'][0]['currentPrice'][0]['@currencyId'];
-            $products[$index]['repository_id'] = 1;
+            $products = array();
+            for ($index = 0; $index < $count; $index++) {
+                $products[$index]['item_id'] = $item[$index]['itemId'][0];
+                $products[$index]['name'] = $item[$index]['title'][0];
+                $products[$index]['image'] = $item[$index]['galleryURL'][0];
+                $products[$index]['price'] = $item[$index]['sellingStatus'][0]['currentPrice'][0]['__value__'];
+                $products[$index]['currency_unit'] = $item[$index]['sellingStatus'][0]['currentPrice'][0]['@currencyId'];
+                $products[$index]['repository_id'] = 1;
+            }
+
+            return $this->sendResponse($products, 'Products retrieved successfully');
         }
-
-        return $this->sendResponse($products, 'Products retrieved successfully');
     }
 
     /**
@@ -87,7 +90,7 @@ class ProductAPIController extends AppBaseController
      * POST /products
      *
      * @param CreateProductAPIRequest $request
-     *
+     *hp
      * @return Response
      */
     public function store(CreateProductAPIRequest $request)
